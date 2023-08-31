@@ -77,9 +77,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void autonomousInit() {
 		// Resets robot code and position before getting auton command.
-		RobotContainer.driveSubsystem.zeroGyroscope();
 		RobotContainer.pneumaticsSubsystem.enableCompressor();
-		RobotContainer.driveSubsystem.resetPose(new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0)));
 		m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
 		// schedule the autonomous command (example)

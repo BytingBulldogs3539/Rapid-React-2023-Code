@@ -44,30 +44,24 @@ public class DriveCommand extends CommandBase {
 
 	@Override
 	public void execute() {
-		Rotation2d gyroAngle = drivetrain.getGyroscopeRotation();
-		double translationXPercent = modifyAxis(RobotContainer.driverController.getLeftStickY());
-		double translationYPercent = -modifyAxis(RobotContainer.driverController.getLeftStickX());
-		double rotationPercent = -modifyAxis(RobotContainer.driverController.getRightStickX());
+		double translationXPercent = modifyAxis(RobotContainer.driverController.getLeftY());
+		double translationYPercent = -modifyAxis(RobotContainer.driverController.getLeftX());
+		double rotationPercent = -modifyAxis(RobotContainer.driverController.getRightX());
 
 		double driveRatio = SmartDashboard.getNumber("Drive Ratio", 0.5);
 		double steerRatio = SmartDashboard.getNumber("Steer Ratio", 0.4);
 
-		if (RobotContainer.driverController.getRightTrigger() > .1) {
+		if (RobotContainer.driverController.getRightTriggerAxis() > .1) {
 			driveRatio = 1.0;
-		}
-
-		if (RobotContainer.driverController.buttonBR.getAsBoolean()) {
-
-			gyroAngle = Rotation2d.fromDegrees(0);
 		}
 
 		drivetrain.drive(
 				ChassisSpeeds.fromFieldRelativeSpeeds(
-						driveRatio * translationXPercent * DriveSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+						-driveRatio * translationXPercent * DriveSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
 						driveRatio * translationYPercent * DriveSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
 						steerRatio * rotationPercent * DriveSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-						gyroAngle));
-	}
+						Rotation2d.fromDegrees(0)));
+ }
 
 	@Override
 	public void end(boolean interrupted) {

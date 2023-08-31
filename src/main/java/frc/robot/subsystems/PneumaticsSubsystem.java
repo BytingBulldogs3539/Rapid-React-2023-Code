@@ -17,18 +17,10 @@ public class PneumaticsSubsystem extends SubsystemBase {
 	final double minPressure = 80;
 	final double maxPressure = 120;
 
-	// Boolean for the direction of the arms
-	public boolean areArmsOut;
-
-	// Boolean for if the grabber is closed (true) or open (false)
-	public boolean grabberStatus;
-
 	// Creates compressor & solenoid objects
 	Compressor compressor;
 	DoubleSolenoid intakeSolenoid;
-	DoubleSolenoid staticClimberSolenoid;
 	DoubleSolenoid climberSolenoid;
-	DoubleSolenoid shooterSolenoid;
 
 	/** Creates a new Pneumatics. */
 	public PneumaticsSubsystem() {
@@ -47,17 +39,6 @@ public class PneumaticsSubsystem extends SubsystemBase {
 		// Add the compressor to the dashboard to see when its running.
 		SmartDashboard.putData(compressor);
 		setIntakeIn();
-		releaseClimbBar();
-		moveClimberIn();
-		setShooterReverse();
-	}
-
-	public void setShooterForward() {
-		shooterSolenoid.set(Value.kForward);
-	}
-
-	public void setShooterReverse() {
-		shooterSolenoid.set(Value.kReverse);
 	}
 
 	public void setIntakeIn() {
@@ -66,26 +47,6 @@ public class PneumaticsSubsystem extends SubsystemBase {
 
 	public void setIntakeOut() {
 		intakeSolenoid.set(Value.kReverse);
-	}
-
-	public void grabClimbBar() {
-		grabberStatus = true;
-		staticClimberSolenoid.set(Value.kReverse);
-	}
-
-	public void releaseClimbBar() {
-		staticClimberSolenoid.set(Value.kForward);
-		grabberStatus = false;
-	}
-
-	public void moveClimberIn() {
-		areArmsOut = false; // Arms are in, so this is false.
-		climberSolenoid.set(Value.kForward);
-	}
-
-	public void moveClimberOut() {
-		areArmsOut = true; // Arms are out, so this is true.
-		climberSolenoid.set(Value.kReverse);
 	}
 
 	public void enableCompressor() {

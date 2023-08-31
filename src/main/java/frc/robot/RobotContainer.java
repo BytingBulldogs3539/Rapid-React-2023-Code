@@ -4,34 +4,29 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.ShootReverse;
 import frc.robot.commands.ShooterCommand;
-import frc.robot.commands.ZeroGyroCommand;
 import frc.robot.constants.CompConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.PneumaticsSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.utilities.LogitechF310;
-import frc.robot.utilities.MacAddress;
 
 public class RobotContainer {
-	private static final String PRACTICE_BOT_MAC_ADDRESS = "00:80:2F:33:C3:90";
 
 	/**
 	 * The container for the robot. Contains subsystems, OI devices, and commands.
 	 */
-	public static Constants constants;
-	public static MacAddress macAddress = new MacAddress(PRACTICE_BOT_MAC_ADDRESS);
 
-	public static LogitechF310 driverController = new LogitechF310(1);
-	public static LogitechF310 operatorController = new LogitechF310(0);
+	public static CompConstants constants = new CompConstants();
+
+	public static CommandXboxController driverController = new CommandXboxController(1);
+	public static CommandXboxController operatorController = new CommandXboxController(0);
 
 	public static IntakeSubsystem intakeSubsystem;
 
@@ -47,8 +42,9 @@ public class RobotContainer {
 
 		intakeSubsystem = new IntakeSubsystem();
 		shooterSubsystem = new ShooterSubsystem();
-		driveSubsystem = new DriveSubsystem();
 		pneumaticsSubsystem = new PneumaticsSubsystem();
+		driveSubsystem = new DriveSubsystem();
+
 
 		configureButtonBindings();
 		putAuton();
@@ -64,13 +60,12 @@ public class RobotContainer {
 	 * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
 	 */
 	private void configureButtonBindings() {
-		operatorController.buttonBL.whileTrue(new ShootReverse(shooterSubsystem));
-		operatorController.buttonPadDown
+		
+		operatorController.leftBumper().whileTrue(new ShootReverse(shooterSubsystem));
+		operatorController.povDown()
 				.whileTrue(new IntakeCommand(1, 0, intakeSubsystem, pneumaticsSubsystem, shooterSubsystem));
-		operatorController.buttonA
-				.whileTrue(new ShooterCommand(shooterSubsystem, intakeSubsystem, false, false, 2900, 3200, 2000)); // Static
-
-		driverController.buttonSTART.onTrue(new ZeroGyroCommand());
+		operatorController.a()
+				.whileTrue(new ShooterCommand(shooterSubsystem, intakeSubsystem, false, false, 2000, 2000, 2000)); // Static
 	}
 
 	public void putAuton() {
