@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.RobotContainer;
+import frc.robot.constants.IDConstants;
 
 public class PneumaticsSubsystem extends SubsystemBase {
 	// Final variables for pressure on and off
@@ -25,16 +25,15 @@ public class PneumaticsSubsystem extends SubsystemBase {
 	/** Creates a new Pneumatics. */
 	public PneumaticsSubsystem() {
 		// Creates a compressor object
-		compressor = new Compressor(RobotContainer.constants.getPneumaticsConstants().getCompressorID(),
+		compressor = new Compressor(IDConstants.compressorID,
 				PneumaticsModuleType.REVPH);
 		compressor.enableAnalog(minPressure, maxPressure);
 		compressor.disable();
 
 		// Creates 1 solenoid objects
-		intakeSolenoid = new DoubleSolenoid(RobotContainer.constants.getPneumaticsConstants().getCompressorID(),
-				PneumaticsModuleType.REVPH, RobotContainer.constants.getPneumaticsConstants().getIntakeSolenoidIn(),
-				RobotContainer.constants.getPneumaticsConstants().getIntakeSolenoidOut());
-
+		intakeSolenoid = new DoubleSolenoid(IDConstants.compressorID,
+				PneumaticsModuleType.REVPH, IDConstants.intakeSolenoidIn,
+				IDConstants.intakeSolenoidOut);
 
 		// Add the compressor to the dashboard to see when its running.
 		SmartDashboard.putData(compressor);

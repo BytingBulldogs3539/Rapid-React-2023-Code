@@ -11,7 +11,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.ShootReverse;
 import frc.robot.commands.ShooterCommand;
-import frc.robot.constants.CompConstants;
+import frc.robot.constants.DriveConstants;
+import frc.robot.constants.IDConstants;
+import frc.robot.constants.IntakeConstants;
+import frc.robot.constants.ShooterConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.PneumaticsSubsystem;
@@ -23,7 +26,12 @@ public class RobotContainer {
 	 * The container for the robot. Contains subsystems, OI devices, and commands.
 	 */
 
-	public static CompConstants constants = new CompConstants();
+	 public static DriveConstants driveConstants = new DriveConstants();
+	 public static ShooterConstants shooterConstants = new ShooterConstants();
+	 public static IntakeConstants intakeConstants = new IntakeConstants();
+	 public static IDConstants idConstants = new IDConstants();
+
+
 
 	public static CommandXboxController driverController = new CommandXboxController(1);
 	public static CommandXboxController operatorController = new CommandXboxController(0);
@@ -65,7 +73,7 @@ public class RobotContainer {
 		operatorController.povDown()
 				.whileTrue(new IntakeCommand(1, 0, intakeSubsystem, pneumaticsSubsystem, shooterSubsystem));
 		operatorController.a()
-				.whileTrue(new ShooterCommand(shooterSubsystem, intakeSubsystem, false, false, 2000, 2000, 2000)); // Static
+				.whileTrue(new ShooterCommand(shooterSubsystem, intakeSubsystem, 2000, 2000, 2000)); // Static
 	}
 
 	public void putAuton() {

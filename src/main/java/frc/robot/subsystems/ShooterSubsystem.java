@@ -8,130 +8,76 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
-// import com.revrobotics.ColorMatch;
-// import com.revrobotics.ColorMatchResult;
-// import com.revrobotics.ColorSensorV3;
+
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.I2C.Port;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.RobotContainer;
-import frc.robot.utilities.GearRatio;
-import frc.robot.utilities.PIDConstants;
+import frc.robot.constants.IDConstants;
+import frc.robot.constants.ShooterConstants;
 
 public class ShooterSubsystem extends SubsystemBase {
 	// Declares shooter motor objects, but does not initialize them yet.
-	TalonFX SM1;
-	TalonFX SM2;
-	TalonFX SM3;
-	TalonFX KM;
-
-	public enum Color {
-		BLUE,
-		RED,
-		UNKNOWN,
-		NONE
-	}
-
-	// Creates final boolean variables for each shooter motor.
-	final boolean hasSM1; // Shooter motor 1
-	final boolean hasSM2; // Shooter motor 2
-	final boolean hasSM3; // Shooter motor 3
-	final boolean hasKM; // Kicker motor
+	TalonFX mainWheels;
+	TalonFX backWheels;
+	TalonFX kickerWheels;
 
 	final Double VELCONV = (2048.0 / 600.0);
 
 	// Creates a new object for the ball sensor (light beam sensor).
 	DigitalInput sensor;
-	final boolean hasSensor;
 
 	// Create color sensor and corosponding color matcher.
-	//ColorSensorV3 colorSensor;
-	//private final ColorMatch colorMatcher = new ColorMatch();
+	// ColorSensorV3 colorSensor;
+	// private final ColorMatch colorMatcher = new ColorMatch();
 
 	public ShooterSubsystem() {
-		PIDConstants pidConstants = RobotContainer.constants.getShooterConstants().getPIDConstants();
-		int SM1ID = RobotContainer.constants.getShooterConstants().getSM1ID();
-		GearRatio SM1GearRatio = RobotContainer.constants.getShooterConstants().getSM1GearRatio();
-		if (RobotContainer.constants.getShooterConstants().getSM1ID() != -1) {
-			hasSM1 = true;
-			SM1 = configureMotor(SM1ID, SM1GearRatio, pidConstants);
-			SM1.setNeutralMode(NeutralMode.Coast);
-		} else {
-			hasSM1 = false;
-		}
-		pidConstants = RobotContainer.constants.getShooterConstants().getTopPIDConstants();
+		int mainWheelsID = IDConstants.mainWheelsID;
+		mainWheels = configureMotor(mainWheelsID, ShooterConstants.mainWheelsInvert,
+				ShooterConstants.mainWheelsCurrentLimit, ShooterConstants.mainWheelsKP, ShooterConstants.mainWheelsKI,
+				ShooterConstants.mainWheelsKD, ShooterConstants.mainWheelsKF);
+		mainWheels.setNeutralMode(NeutralMode.Coast);
 
-		int SM2ID = RobotContainer.constants.getShooterConstants().getSM2ID();
-		GearRatio SM2GearRatio = RobotContainer.constants.getShooterConstants().getSM2GearRatio();
-		if (RobotContainer.constants.getShooterConstants().getSM2ID() != -1) {
-			hasSM2 = true;
-			SM2 = configureMotor(SM2ID, SM2GearRatio, pidConstants);
-			SM2.setNeutralMode(NeutralMode.Coast);
-		} else {
-			hasSM2 = false;
-		}
-		pidConstants = RobotContainer.constants.getShooterConstants().getPIDConstants();
+		int backWheelsID = IDConstants.backWheelsID;
 
-		int SM3ID = RobotContainer.constants.getShooterConstants().getSM3ID();
-		GearRatio SM3GearRatio = RobotContainer.constants.getShooterConstants().getSM3GearRatio();
-		if (RobotContainer.constants.getShooterConstants().getSM3ID() != -1) {
-			hasSM3 = true;
-			SM3 = configureMotor(SM3ID, SM3GearRatio, pidConstants);
-			SM3.setNeutralMode(NeutralMode.Coast);
-		} else {
-			hasSM3 = false;
+		backWheels = configureMotor(backWheelsID, ShooterConstants.backWheelsInvert,
+		ShooterConstants.backWheelsCurrentLimit, ShooterConstants.backWheelsKP, ShooterConstants.backWheelsKI,
+		ShooterConstants.backWheelsKD, ShooterConstants.backWheelsKF);
+		backWheels.setNeutralMode(NeutralMode.Coast);
 
-		}
+		int kickerWheelsID = IDConstants.kickerWheelsID;
 
-		int KMID = RobotContainer.constants.getShooterConstants().getKMID();
-		GearRatio KMGearRatio = RobotContainer.constants.getShooterConstants().getKMGearRatio();
-		if (RobotContainer.constants.getShooterConstants().getKMID() != -1) {
-			hasKM = true;
-			KM = configureMotor(KMID, KMGearRatio, pidConstants);
-			KM.setNeutralMode(NeutralMode.Brake);
-		} else {
-			hasKM = false;
-		}
+		kickerWheels = configureMotor(kickerWheelsID, ShooterConstants.kickerWheelsInvert,
+		ShooterConstants.kickerWheelsCurrentLimit, ShooterConstants.kickerWheelsKP, ShooterConstants.kickerWheelsKI,
+		ShooterConstants.kickerWheelsKD, ShooterConstants.kickerWheelsKF);
+		kickerWheels.setNeutralMode(NeutralMode.Brake);
 
-		if (RobotContainer.constants.getShooterConstants().getDigitalInput() != -1) {
-			sensor = new DigitalInput(RobotContainer.constants.getShooterConstants().getDigitalInput());
-			hasSensor = true;
-		} else {
-			hasSensor = false;
-		}
-
-		if (RobotContainer.constants.getShooterConstants().getColorSensor()) {
-			//colorSensor = new ColorSensorV3(Port.kOnboard);
-		}
+		sensor = new DigitalInput(IDConstants.digitalInputID);
 	}
 
-	public TalonFX configureMotor(int motorID, GearRatio gearRatio, PIDConstants pidConstants) {
+	public TalonFX configureMotor(int motorID, boolean inverted, int currentLimit, double kp, double ki, double kd,
+			double kf) {
 		TalonFX motor = new TalonFX(motorID);
-		motor.setInverted(gearRatio.getInverted());
-		motor.setSensorPhase(RobotContainer.constants.getShooterConstants().getSM1GearRatio().getInverted());
+		motor.setInverted(inverted);
+		motor.setSensorPhase(inverted);
 		motor.configSupplyCurrentLimit(
-				new SupplyCurrentLimitConfiguration(true, gearRatio.getCurrentLimit(), gearRatio.getCurrentLimit(), 0));
-		setPIDConstants(motor, pidConstants);
+				new SupplyCurrentLimitConfiguration(true, currentLimit, currentLimit, 0));
+		setPIDConstants(motor, kp, ki, kd, kf);
 
 		return motor;
 	}
 
-		/***
+	/***
 	 * Configures PID constants for the given shooter motor
 	 * 
 	 * @param motor        (motor whose PID constants will be set)
 	 * @param PIDConstants (PID constants to set the shooter motor's PID constants
 	 *                     to)
 	 */
-	public void setPIDConstants(TalonFX motor, PIDConstants pidConstants) {
+	public void setPIDConstants(TalonFX motor, double kp, double ki, double kd, double kf) {
 		if (motor != null) {
-			motor.config_kP(0, pidConstants.getP());
-			motor.config_kI(0, pidConstants.getI());
-			motor.config_kD(0, pidConstants.getD());
-			motor.config_kF(0, pidConstants.getF());
+			motor.config_kP(0, kp);
+			motor.config_kI(0, ki);
+			motor.config_kD(0, kd);
+			motor.config_kF(0, kf);
 			motor.configMaxIntegralAccumulator(0, 0);
 		}
 	}
@@ -141,68 +87,45 @@ public class ShooterSubsystem extends SubsystemBase {
 	 *         true if the robot does not have a sensor.
 	 */
 	public boolean getSensor() {
-		if (hasSensor) {
-			if (RobotContainer.constants.getShooterConstants().invertSensor()) {
-				return !sensor.get();
-			}
-			return sensor.get();
+		if (ShooterConstants.invertSensor) {
+			return !sensor.get();
 		}
-		return true;
+		return sensor.get();
 	}
 
 	/***
 	 * Sets the percent output of all of the shooter motors
 	 * 
-	 * @param SM1Speed (Percent output to set the first shooter motor to)
-	 * @param SM2Speed (Percent output to set the second shooter motor to)
+	 * @param mainWheelsSpeed (Percent output to set the first shooter motor to)
+	 * @param backWheelsSpeed (Percent output to set the second shooter motor to)
 	 * @param SM3Speed (Percent output to set the third shooter motor to)
 	 * @param KMSpeed  (Percent output to set the kicker motor to)
 	 */
-	public void setShooterPercentOutput(double SM1Speed, double SM2Speed, double SM3Speed, double KMSpeed) {
-		if (hasSM1)
-			SM1.set(TalonFXControlMode.PercentOutput,
-					SM1Speed * RobotContainer.constants.getShooterConstants().getSM1GearRatio().getGearRatio());
-
-		if (hasSM2)
-			SM2.set(TalonFXControlMode.PercentOutput, SM2Speed);
-
-		if (hasSM3)
-			SM3.set(TalonFXControlMode.PercentOutput, SM3Speed);
-
-		if (hasKM)
-			KM.set(TalonFXControlMode.PercentOutput,
-					KMSpeed * RobotContainer.constants.getShooterConstants().getKMGearRatio().getGearRatio());
+	public void setShooterPercentOutput(double mainWheelsSpeed, double backWheelsSpeed, double KMSpeed) {
+		mainWheels.set(TalonFXControlMode.PercentOutput,
+				mainWheelsSpeed * ShooterConstants.mainWheelsGearRatio);
+		backWheels.set(TalonFXControlMode.PercentOutput, backWheelsSpeed);
+		kickerWheels.set(TalonFXControlMode.PercentOutput,
+				KMSpeed * ShooterConstants.kickerWheelsGearRatio);
 	}
 
 	/***
 	 * Sets the percent output of the first shooter motor.
 	 * 
-	 * @param SM1Speed (Percent output to set the first shooter motor to)
+	 * @param mainWheelsSpeed (Percent output to set the first shooter motor to)
 	 */
-	public void setSM1PercentOutput(double SM1Speed) {
-		if (hasSM1)
-			SM1.set(TalonFXControlMode.PercentOutput,
-					SM1Speed * RobotContainer.constants.getShooterConstants().getSM1GearRatio().getGearRatio());
+	public void setMainWheelsPercentOutput(double mainWheelsSpeed) {
+		mainWheels.set(TalonFXControlMode.PercentOutput,
+				mainWheelsSpeed * ShooterConstants.mainWheelsGearRatio);
 	}
 
 	/***
 	 * Sets the percent output of the second shooter motor.
 	 * 
-	 * @param SM2Speed (Percent output to set the second shooter motor to)
+	 * @param backWheelsSpeed (Percent output to set the second shooter motor to)
 	 */
-	public void setSM2PercentOutput(double SM2Speed) {
-		if (hasSM2)
-			SM2.set(TalonFXControlMode.PercentOutput, SM2Speed);
-	}
-
-	/***
-	 * Sets the percent output of the third shooter motor.
-	 * 
-	 * @param SM3Speed (Percent output to set the third shooter motor to)
-	 */
-	public void setSM3PercentOutput(double SM3Speed) {
-		if (hasSM3)
-			SM3.set(TalonFXControlMode.PercentOutput, SM3Speed);
+	public void setBackWheelsPercentOutput(double backWheelsSpeed) {
+		backWheels.set(TalonFXControlMode.PercentOutput, backWheelsSpeed);
 	}
 
 	/***
@@ -210,10 +133,9 @@ public class ShooterSubsystem extends SubsystemBase {
 	 * 
 	 * @param KMSpeed (Percent output to set the kicker motor to)
 	 */
-	public void setKMPercentOutput(double KMSpeed) {
-		if (hasKM)
-			KM.set(TalonFXControlMode.PercentOutput,
-					KMSpeed * RobotContainer.constants.getShooterConstants().getKMGearRatio().getGearRatio());
+	public void setKickerWheelsPercentOutput(double KMSpeed) {
+		kickerWheels.set(TalonFXControlMode.PercentOutput,
+				KMSpeed * ShooterConstants.kickerWheelsGearRatio);
 	}
 
 	/**
@@ -222,18 +144,12 @@ public class ShooterSubsystem extends SubsystemBase {
 	 * @param speed (Value to set the speed of every shooter motor to)
 	 */
 	public void setSMSpeeds(double speed) {
-		if (hasSM1)
-			SM1.set(TalonFXControlMode.Velocity,
-					speed * VELCONV * RobotContainer.constants.getShooterConstants().getSM1GearRatio().getGearRatio());
-		if (hasSM2)
-			SM2.set(TalonFXControlMode.Velocity,
-					speed * VELCONV * RobotContainer.constants.getShooterConstants().getSM2GearRatio().getGearRatio());
-		if (hasSM3)
-			SM3.set(TalonFXControlMode.Velocity,
-					speed * VELCONV * RobotContainer.constants.getShooterConstants().getSM3GearRatio().getGearRatio());
-		if (hasKM)
-			KM.set(TalonFXControlMode.Velocity,
-					speed * VELCONV * RobotContainer.constants.getShooterConstants().getKMGearRatio().getGearRatio());
+		mainWheels.set(TalonFXControlMode.Velocity,
+				speed * VELCONV * ShooterConstants.mainWheelsGearRatio);
+		backWheels.set(TalonFXControlMode.Velocity,
+				speed * VELCONV * ShooterConstants.backWheelsGearRatio);
+		kickerWheels.set(TalonFXControlMode.Velocity,
+				speed * VELCONV * ShooterConstants.kickerWheelsGearRatio);
 	}
 
 	/**
@@ -241,10 +157,9 @@ public class ShooterSubsystem extends SubsystemBase {
 	 * 
 	 * @param speed (Value to set the speed of the first shooter motor to in rpm)
 	 */
-	public void setSM1Speed(double speed) {
-		if (hasSM1)
-			SM1.set(TalonFXControlMode.Velocity,
-					speed * VELCONV * RobotContainer.constants.getShooterConstants().getSM1GearRatio().getGearRatio());
+	public void setMainWheelsSpeed(double speed) {
+		mainWheels.set(TalonFXControlMode.Velocity,
+				speed * VELCONV * ShooterConstants.mainWheelsGearRatio);
 	}
 
 	/**
@@ -252,21 +167,9 @@ public class ShooterSubsystem extends SubsystemBase {
 	 * 
 	 * @param speed (Value to set the speed of the second shooter motor to in rpm)
 	 */
-	public void setSM2Speed(double speed) {
-		if (hasSM2)
-			SM2.set(TalonFXControlMode.Velocity,
-					speed * VELCONV * RobotContainer.constants.getShooterConstants().getSM2GearRatio().getGearRatio());
-	}
-
-	/**
-	 * Sets the speed of the third shooter motor.
-	 * 
-	 * @param speed (Value to set the speed of the third shooter motor to in rpm)
-	 */
-	public void setSM3Speed(double speed) {
-		if (hasSM3)
-			SM3.set(TalonFXControlMode.Velocity,
-					speed * VELCONV * RobotContainer.constants.getShooterConstants().getSM3GearRatio().getGearRatio());
+	public void setBackWheelsSpeed(double speed) {
+		backWheels.set(TalonFXControlMode.Velocity,
+				speed * VELCONV * ShooterConstants.backWheelsGearRatio);
 	}
 
 	/**
@@ -274,76 +177,48 @@ public class ShooterSubsystem extends SubsystemBase {
 	 * 
 	 * @param speed (Value to set the speed of the kicker motor to in rpm)
 	 */
-	public void setKMSpeed(double speed) {
-		if (hasKM)
-			KM.set(TalonFXControlMode.Velocity,
-					speed * VELCONV * RobotContainer.constants.getShooterConstants().getKMGearRatio().getGearRatio());
+	public void setKickerWheelsSpeed(double speed) {
+		kickerWheels.set(TalonFXControlMode.Velocity,
+				speed * VELCONV * ShooterConstants.kickerWheelsGearRatio);
 	}
 
-	public boolean SM1AtTarget(double tolerance) {
-		return SM1.getClosedLoopError() < tolerance;
+	/**
+	 * 
+	 * @param tolerance in rpm
+	 * @return is or is not within the tolerance of the set rpm.
+	 */
+	public boolean mainWheelsAtTarget(double tolerance) {
+		return (mainWheels.getClosedLoopError() / VELCONV) < tolerance;
 	}
 
-	public boolean SM2AtTarget(double tolerance) {
-		return SM2.getClosedLoopError() < tolerance;
+	/**
+	 * 
+	 * @param tolerance in rpm
+	 * @return is or is not within the tolerance of the set rpm.
+	 */
+	public boolean backWheelsAtTarget(double tolerance) {
+		return (backWheels.getClosedLoopError() / VELCONV) < tolerance;
 	}
 
-	public boolean SM3AtTarget(double tolerance) {
-		return SM3.getClosedLoopError() < tolerance;
-	}
-
-	public boolean KM1AtTarget(double tolerance) {
-		return KM.getClosedLoopError() < tolerance;
-	}
-
-	public Color getAllianceColor()
-	{
-		if(DriverStation.getAlliance() == Alliance.Blue)
-			return Color.BLUE;
-		if(DriverStation.getAlliance() == Alliance.Red)
-			return Color.RED;
-		if(DriverStation.getAlliance() == Alliance.Invalid)
-			return Color.UNKNOWN;
-		return Color.UNKNOWN;
-	}
-
-	public Color getColorSensorColor()
-	{
-		
-		/*if(colorSensor.getRed()>colorSensor.getBlue() && colorSensor.getRed()>300)
-		{
-			return Color.RED;
-		}
-		if(colorSensor.getBlue()>colorSensor.getRed() && colorSensor.getBlue()>300)
-		{
-			return Color.BLUE;
-		}*/
-		return Color.NONE;
+	/**
+	 * 
+	 * @param tolerance in rpm
+	 * @return is or is not within the tolerance of the set rpm.
+	 */
+	public boolean kickerWheelsAtTarget(double tolerance) {
+		return (kickerWheels.getClosedLoopError() / VELCONV) < tolerance;
 	}
 
 	@Override
 	public void periodic() {
 		// This method will be called once per scheduler run.
-
-		// If there is a color sensor, display its RGB values to the SmartDashboard.
-		/*if (colorSensor != null) {
-			SmartDashboard.putNumber("Get Red", colorSensor.getRed());
-			SmartDashboard.putNumber("Get Green", colorSensor.getGreen());
-			SmartDashboard.putNumber("Get Blue", colorSensor.getBlue());
-		}*/
 	}
 
 	public void stop() {
-		if (hasSM1)
-			SM1.set(TalonFXControlMode.PercentOutput, 0);
+		mainWheels.set(TalonFXControlMode.PercentOutput, 0);
 
-		if (hasSM2)
-			SM2.set(TalonFXControlMode.PercentOutput, 0);
+		backWheels.set(TalonFXControlMode.PercentOutput, 0);
 
-		if (hasSM3)
-			SM3.set(TalonFXControlMode.PercentOutput, 0);
-
-		if (hasKM)
-			KM.set(TalonFXControlMode.PercentOutput, 0);
+		kickerWheels.set(TalonFXControlMode.PercentOutput, 0);
 	}
 }

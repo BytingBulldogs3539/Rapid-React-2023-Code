@@ -29,7 +29,6 @@ public class IntakeCommand extends CommandBase {
 		this.kDwnSpeed = kDwnSpeed;
 		this.pneumatics = pneumatics;
 		this.shooterSubsystem = shooterSubsystem;
-
 		this.intakeSubsystem = intakeSubsystem;
 	}
 
@@ -38,16 +37,15 @@ public class IntakeCommand extends CommandBase {
 	public void initialize() {
 		pneumatics.setIntakeOut();
 		intakeSubsystem.setIntakeSpeed(speed);
-		intakeSubsystem.setKnockDownSpeed(kDwnSpeed);
 	}
 
 	// Called every time the scheduler runs while the command is scheduled.
 	@Override
 	public void execute() {
 		if (!shooterSubsystem.getSensor()) {
-			shooterSubsystem.setKMPercentOutput(0.35/2);
+			shooterSubsystem.setKickerWheelsPercentOutput(0.35/2);
 		} else {
-			shooterSubsystem.setKMPercentOutput(0.0);
+			shooterSubsystem.setKickerWheelsPercentOutput(0.0);
 		}
 	}
 
@@ -56,15 +54,13 @@ public class IntakeCommand extends CommandBase {
 	public void end(boolean interrupted) {
 		pneumatics.setIntakeIn();
 		intakeSubsystem.setIntakeSpeed(0);
-		shooterSubsystem.setKMPercentOutput(0.0);
-		intakeSubsystem.setKnockDownSpeed(0.0);
+		shooterSubsystem.setKickerWheelsPercentOutput(0.0);
 
 	}
 
 	// Returns true when the command should end.
 	@Override
 	public boolean isFinished() {
-
 		return false;
 	}
 }

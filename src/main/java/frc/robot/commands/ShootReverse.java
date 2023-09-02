@@ -17,8 +17,8 @@ public class ShootReverse extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    this.shooterSubsystem.setKMPercentOutput(-.25);
-    this.shooterSubsystem.setSM1PercentOutput(-.5);
+    this.shooterSubsystem.setKickerWheelsPercentOutput(-.25);
+    this.shooterSubsystem.setMainWheelsPercentOutput(-.5);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
